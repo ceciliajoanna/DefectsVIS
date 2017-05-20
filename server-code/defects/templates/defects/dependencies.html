@@ -1,0 +1,72 @@
+{% extends "defects/base_defects.html" %}
+{% load staticfiles %}
+{% block head %}
+
+
+
+  <style type="text/css">
+    #mynetwork {
+      /*width: 600px;*/
+      height:600px;
+      min-height: 600px;
+      border: 1px solid lightgray;
+    }
+  </style>
+<!--<link rel="stylesheet" href="{%static 'defects/graph-creator.css'%}" />-->
+<link rel="stylesheet" href="{%static 'defects/visjs/vis-network.min.css'%}" />
+<script src="{%static 'defects/visjs/vis.js' %}" type="text/javascript"></script>
+{% endblock %}
+
+
+{% block javascript %}
+<!--<script src="//d3js.org/d3.v3.js" charset="utf-8"></script>
+<script src="//cdn.jsdelivr.net/filesaver.js/0.1/FileSaver.min.js"></script>
+<script src="{%static 'defects/graph-creator.js'%}"></script>-->
+
+<!-- Retrieved from http://stackoverflow.com/a/6823364
+<script type="text/javascript" src="{%static 'defects/randomColors.js'%}"></script>-->
+<script type="text/javascript">
+  // create an array with nodes , font:{color: "{{bug.textColor}}"}
+  var nodes = new vis.DataSet([
+    {%for bug in nodes %} {id: {{bug.id}}, label: 'Bug#'+{{bug.id}},  color:{background: "{{bug.color}}"}  }, {% endfor %}
+  ]);
+
+  // create an array with edges
+  var edges = new vis.DataSet([
+    {%for d in defects %} {from: {{d.from_defect_id}}, to: {{d.to_defect_id}}, arrows:'to' }, {% endfor %}
+  ]);
+
+  // create a network
+  var container = document.getElementById('mynetwork');
+  var data = {
+    nodes: nodes,
+    edges: edges
+  };
+  var options = {};
+  var network = new vis.Network(container, data, options);
+</script>
+{% endblock %}
+
+{% block body_content %}
+<div class="row">
+    <div class="col-lg-12">
+        <h1 class="page-header">Defects Dependencies Visualization</h1>
+        <h3>Components</h3>
+         {% for c in components %}
+            <div class="col-lg-3" style="margin-top:10px;" ><div style="vertical-align: middle;display:inline-block;width:20px;height:20px;text-align:center;background-color:{{c.color}}"></div> {{c.component}}</div>
+        {% endfor %}
+    </div>
+    <!-- /.col-lg-12 -->
+    <div class="col-lg-12">
+
+
+    </div>
+    <!-- /.col-lg-12 -->
+    <div class="col-lg-12" id="mynetwork">
+    </div>
+    <!-- /.col-lg-12 -->
+</div>
+
+
+
+{% endblock %}

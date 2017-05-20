@@ -1,0 +1,226 @@
+{% extends "defects/base_defects.html" %}
+{% load staticfiles %}
+{% block head %}
+<style type="text/css">
+    .bigtext{
+        font-size: 30px;
+    }
+    /* Code snippet from http://stackoverflow.com/a/36074412 */
+    .mbox {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin: 10px 55px 10px 25px;
+        padding-left: 4px;
+    }
+
+</style>
+{% endblock %}
+
+{% block javascript %}
+<script type="text/javascript">
+var componentsData = [
+{% for c in components %}
+    { label:"{{ c.component }}",value:{{c.total}} },
+{% endfor %}
+];
+
+
+
+
+var trendData = [
+    {% for data in defects_trend %}
+        { {% for key, values in data.items %}"{{key}}": {{values}},{% endfor %} },
+    {% endfor %}
+];
+
+
+
+var yLabels = [
+    {% for key,value in defects_trend.0.items %}
+        {% if key != "year" %}"{{key}}",{% endif %}
+    {% endfor %}
+];
+var yKeys = yLabels;
+
+
+$(function() {
+    // Donut chart
+    var donutChart = Morris.Donut({
+        element: 'morris-donut-chart-components',
+        data: componentsData,
+        resize: true
+    });
+    // Bar Chart
+    var barChart = Morris.Bar({
+        element: 'morris-bar-chart',
+        data: trendData,
+        xkey: 'year',//'y',
+        ykeys: yKeys,//['a', 'b'],
+        labels: yLabels,//['Series A', 'Series B'],
+        hideHover: 'auto',
+        resize: true,
+        stacked:true,
+    });
+
+    console.log(barChart);
+    barChart.options.labels.forEach(function(label, i){
+
+
+
+        // var legendlabel=$('<span style="display: inline-block;">'+label+'</span>');
+        // var legendItem = $('<div class="mbox"></div>').css('background-color', barChart.options.barColors[i]).append(legendlabel);
+        var legendItem = $('<div style="vertical-align: middle;display:inline-block;margin-top:10px;" >&nbsp;<div style="vertical-align: middle;display:inline-block;width:20px;height:20px;text-align:center;background-color:'+barChart.options.barColors[i]+'"></div>'+label+'&nbsp;&nbsp; </div>');
+        $('#legend').append(legendItem);
+    });
+
+});
+
+
+
+
+</script>
+{% endblock %}
+
+
+{% block body_content %}
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Dashboard of Defects from Wireshark</h1>
+        </div>
+        <!-- /.col-lg-12 -->
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel panel-red">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-bug fa-3x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="bigtext">{{total_defects}}</div>
+                        </div>
+                        <div class="col-xs-12 text-right">Defects</div>
+                    </div>
+                </div>
+                <a href="{% url 'defects:defects_list' %}">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-green">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-users fa-3x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="bigtext">{{total_maintainers}}</div>
+                        </div>
+                        <div class="col-xs-12 text-right">Repair Developers</div>
+                    </div>
+                </div>
+                <a href="{% url 'defects:defects_developers' %}">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="panel panel-yellow">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-warning fa-3x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="bigtext">{{total_blocking_defects}}</div>
+                        </div>
+                        <div class="col-xs-12 text-right">Blocking Defects</div>
+                    </div>
+                </div>
+                <a href="{% url 'defects:defects_dependencies' %}">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="panel panel-primary">
+                <div class="panel-heading">
+                    <div class="row">
+                        <div class="col-xs-3">
+                            <i class="fa fa-clock-o fa-3x"></i>
+                        </div>
+                        <div class="col-xs-9 text-right">
+                            <div class="bigtext">{{avg_ttf}}</div>
+                        </div>
+                        <div class="col-xs-12 text-right">Avg. Days To Fix Defects</div>
+                    </div>
+                </div>
+                <a href="{% url 'defects:defects_time' %}">
+                    <div class="panel-footer">
+                        <span class="pull-left">View Details</span>
+                        <span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
+                        <div class="clearfix"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+    <div class="row">
+        <div class="col-md-8">
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i>
+                    Defect Resolution Trendline
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="row">
+                        <div id="legend"></div>
+                        <div id="morris-bar-chart"></div>
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+
+        </div>
+        <!-- /.col-lg-8 -->
+        <div class="col-md-4">
+            <!-- Donut chart of bugs per component -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-bar-chart-o fa-fw"></i>
+                    Defects per Component
+                </div>
+                <div class="panel-body">
+                    <div id="morris-donut-chart-components"></div>
+                    <!--<a href="#" class="btn btn-default btn-block">View Details</a>-->
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /.col-lg-4 -->
+    </div>
+    <!-- /.row -->
+{% endblock %}
